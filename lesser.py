@@ -86,6 +86,6 @@ for filename in os.listdir():
 	if filename[-4:] == 'docx':
 		pisanie(filename)
 
-	if filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-3:] == 'jpeg':
+	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-3:] == 'jpeg') and filename[-5].isdigit():
 		zdjęcie(filename)
 
