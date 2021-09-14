@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-#lesser.py wersja 1.1 - Jakub "ybuq" Idec
+version = 'v1.2'
+
 import docx2txt
 from PIL import Image
 import os
@@ -42,10 +43,10 @@ def pisanie(filenamedocx):
 					zawartość.append(f'<p>{line}</p>\n')
 
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
-		print('Plik',filename[:-4]+'txt','poprawnie stworzony')
+		print('#Plik',filename[:-4]+'txt','poprawnie stworzony')
 
 	except:
-		print('Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')
+		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')
 		return 0
 
 
@@ -55,7 +56,7 @@ def zdjęcie(filenamezdj):
 	width,height = img.size[0],img.size[1]
 
 	if img.size[0] == 300 or img.size[0] == 280:
-		print('\tPlik',filename[:-3]+'jpg','ma odpowiednie wymiary')
+		print('\t#Plik',filename[:-3]+'jpg','ma odpowiednie wymiary')
 		return 0
 
 	if img.size[0] < img.size[1]:
@@ -72,20 +73,33 @@ def zdjęcie(filenamezdj):
 
 	resized_img = img.resize((new_width, new_height), Image.ANTIALIAS)
 
-	if filenamezdj[-3:] == 'jpg' or filenamezdj[-3:] == 'jpeg':
-		resized_img.save(filenamezdj[:-3]+filenamezdj[-3:])
-		print('Plik',filename[:-3]+'jpg','poprawnie stworzony')
-		return 0
-	else:
-		resized_img.save(filenamezdj[:-3]+'jpg')
-		print('Plik',filename[:-3]+'jpg','poprawnie stworzony')
-		return 0
+	try:
+		if filenamezdj[-3:] == 'jpg' or filenamezdj[-3:] == 'jpeg':
+			resized_img.save(filenamezdj[:-3]+filenamezdj[-3:])
+			print('#Plik',filename[:-3]+'jpg','poprawnie stworzony')
+			return
+		else:
+			resized_img.save(filenamezdj[:-3]+'jpg')
+			print('#Plik',filename[:-3]+'jpg','poprawnie stworzony')
+			return
+	except:
+		print('#Błąd pliku',filename)
+		return
 
+print(f'######### lesser.py ### {version} #########\n')
 
+jestplik = False
 for filename in os.listdir():
 	if filename[-4:] == 'docx':
 		pisanie(filename)
+		jestplik = True
 
 	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-3:] == 'jpeg') and filename[-5].isdigit():
 		zdjęcie(filename)
+		jestplik = True
 
+if not jestplik:
+	print('#Nie znaleziono żadnych plików')
+
+
+#	#		#		#		#		Jakub "ybuq" Idec		#		#		#		#	#
