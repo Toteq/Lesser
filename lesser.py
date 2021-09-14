@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = 'v1.2'
+version = 'v1.3'
 
 import docx2txt
 from PIL import Image
@@ -20,7 +20,7 @@ def pisanie(filenamedocx):
 				continue
 			if not line:
 				continue
-			if grafika and line.strip():
+			if grafika and len(line) > 8:
 				if line[4] == 's':
 					index = line[8:].find('/')
 					zawartość.append(f'<li><a href="https://{line[8:]}">{line[8:index+8]}</a></li>\n')
@@ -45,8 +45,9 @@ def pisanie(filenamedocx):
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
 		print('#Plik',filename[:-4]+'txt','poprawnie stworzony')
 
-	except:
+	except TabError:
 		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')
+		print(TabError)
 		return 0
 
 
