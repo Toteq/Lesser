@@ -30,7 +30,9 @@ def pisanie(filenamedocx):
 					zawartość.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
 					continue
 				else:
-					zawartość.append('</ul>\n')
+					zawartość.append('</ul>\n')#Koniec grafik
+					zawartość.append(Podpis+'\n')#Podpis
+					zawartość.append(line[10:])#Komentarz bez początku "Komenatrz:"
 					break
 			if line == 'Grafika:':
 				grafika = 1
@@ -40,7 +42,10 @@ def pisanie(filenamedocx):
 					połowa = (len(line)/2)
 					zawartość.append(f'<p>{line[0:int(połowa)]}<<<<<<<GRAFIKA>>>>>>>{line[int(połowa):]}</p>\n')
 				else:
-					zawartość.append(f'<p>{line}</p>\n')
+					if len(line)>8:
+						zawartość.append(f'<p>{line}</p>\n')#Akapity
+					else:
+						Podpis = line#Podpis
 
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
 		print('#Plik',filename[:-4]+'txt','poprawnie stworzony')
