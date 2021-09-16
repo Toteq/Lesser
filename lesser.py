@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = 'v1.3'
+version = 'v1.4'
 
 import docx2txt
 from PIL import Image
