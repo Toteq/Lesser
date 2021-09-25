@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = 'v1.7'
+version = 'v1.8'
 
 import docx2txt
 from PIL import Image
@@ -13,6 +13,7 @@ def felieton(filenamedocx):
 	tekst = []#tytuł i tekst
 	Linki = []#liniki do grafik
 	Podpis = []#podpis i komentarz
+	autor = 'Czytelnik SGI Lesser'
 	grafika = 0
 	zawartość = []
 
@@ -49,6 +50,7 @@ def felieton(filenamedocx):
 						tekst.append(f'<b>{line}</b>\n')#Akapity
 					else:
 						autor = line#autor
+
 
 		#grafiki w tekscie
 		Tekst = ''
@@ -118,7 +120,10 @@ def poezja(filenamedocx):
 				linki.append('</p>\n\n<p>Grafika:</p>\n<ul>\n')
 			else:
 				if grafika:
-					podpis.append(line+'\n')#Podpis
+					try:
+						podpis.append(line+'\n')#Podpis
+					except:
+						podpis.append('Czytelnik SGI Lesser\n')
 				else:
 					if po:
 						tekst.append(f'<p class="ct">{line}')
