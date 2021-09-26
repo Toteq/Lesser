@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = 'v1.8'
+version = 'v1.9'
 
 import docx2txt
 from PIL import Image
@@ -57,9 +57,9 @@ def felieton(filenamedocx):
 		index_grafik = []
 		tekst = ''.join(tekst)
 		długość = len(tekst)
-		co_ile = długość//(ile_jest_grafik+1)
+		co_ile = długość//(ile_jest_grafik)
 
-		[index_grafik.append(co_ile*x) for x in range(1, ile_jest_grafik+1)]
+		[index_grafik.append(co_ile*x) for x in range(1, ile_jest_grafik)]
 
 		for i,litera in enumerate(tekst):
 			if i in index_grafik:
