@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-version = 'v1.9'
+version = 'v2.0'
 
-import docx2txt
-from PIL import Image
+import docx2txt#zamienia docx na txt
+from PIL import Image#operacje na zdjęciach
 import os
 
 
@@ -13,56 +13,56 @@ def felieton(filenamedocx):
 	tekst = []#tytuł i tekst
 	Linki = []#liniki do grafik
 	Podpis = []#podpis i komentarz
-	autor = 'Czytelnik SGI Lesser'
+	autor = 'Czytelnik SGI Lesser'#Autor domyślny gdy nie ma podpisu
 	grafika = 0
 	zawartość = []
 
 	try:
 
-		for i,line in enumerate(docx2txt.process(filenamedocx,'r').strip().split('\n')):#args.filenamedocx
+		for i,line in enumerate(docx2txt.process(filenamedocx,'r').strip().split('\n')):
 			if i == 0:
-				tytuł += line+'\n'
+				tytuł += line+'\n'#Na początku wydzielam tytuł
 				continue
 			if not line:
 				continue
-			if grafika and len(line) > 8:
-				if line[4] == 's':
+			if grafika and len(line) > 8:#Tworzenie linków gdy line nie jest podpisem
+				if line[4] == 's':#https
 					index = line[8:].find('/')
 					Linki.append(f'<li><a href="https://{line[8:]}">{line[8:index+8]}</a></li>\n')
 					continue
-				elif line[4]== ':':
+				elif line[4]== ':':#http
 					index = line[7:].find('/')
 					Linki.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
 					continue
-				elif len(line)>20:
-					Linki.append('</ul>\n')#Koniec grafik
+				elif len(line)>20:#Kiedy trafimy na Komentarz(samo "Komentarz:" ma 10 znaków - mogą być problemy przy krótszych komentarzach)
+					Linki.append('</ul>\n')#Koniec listy
 					Podpis.append(autor+'\n')#Podpis
-					Podpis.append(line[10:])#Komentarz bez początku "Komenatrz:"
+					Podpis.append(line[10:])#Komentarz bez "Komenatrz:"
 					break
-			if line == 'Grafika:':
+			if line == 'Grafika:':#Start grafika
 				grafika = 1
 				Linki.append('<p>Grafika:</p>\n<ul>\n')
 			else:
-				if len(line) > 20:
+				if len(line) > 20:#Treść artykułu
 					tekst.append(f'<p>{line}</p>\n')
 				else:
-					if len(line)>8 and not grafika:
+					if len(line) > 8 and len(line) < 20 and not grafika:#Podpis w Tekstach Czytelnika i nie tylko...
 						tekst.append(f'<b>{line}</b>\n')#Akapity
 					else:
-						autor = line#autor
+						autor = line#Podpis autora
 
 
-		#grafiki w tekscie
-		Tekst = ''
-		index_grafik = []
-		tekst = ''.join(tekst)
-		długość = len(tekst)
-		co_ile = długość//(ile_jest_grafik)
+		#Rozmieszczenie grafik w tekscie(test)
+		Tekst = ''#Końcowy tekst
+		index_grafik = []#Lista przechowująca indexy gdzie powinny znajdować sie grafiki
+		tekst = ''.join(tekst)#Złączenie listy treści artykułu na string
+		długość = len(tekst)#Długość treści artykułu
+		co_ile = długość//(ile_jest_grafik)#Co ile liter ma być grafika
 
-		[index_grafik.append(co_ile*x) for x in range(1, ile_jest_grafik)]
+		[index_grafik.append(co_ile*x) for x in range(1, ile_jest_grafik)]#Tworzenie listy która przechowuje kolejne indeksy gdzie znajdować mają się grafiki
 
-		for i,litera in enumerate(tekst):
-			if i in index_grafik:
+		for i,litera in enumerate(tekst):#index, litera
+			if i in index_grafik:#Jeżeli index litery jest taki sam jak index grafiki
 				Tekst += '<<<GRAFIKA>>>'+litera
 			else:
 				Tekst += litera
@@ -82,112 +82,112 @@ def felieton(filenamedocx):
 
 def poezja(filenamedocx):
 
-	tytuł = ''
-	tekst = []#tytuł i tekst
-	linki = []#liniki do grafik
-	podpis = []#podpis i komentarz
+	Tytuł = ''
+	Tekst = []#tytuł i tekst
+	Linki = []#liniki do grafik
+	Podpis = []#podpis i komentarz
 	grafika = 0
 	enter = 0
-	po = False
+	po = False#Gdy jest "po" akapicie wersów
 	zawartość = []
 
 	try:
 
 		for i,line in enumerate(docx2txt.process(filenamedocx,'r').strip().split('\n')):#args.filenamedocx
 
-			if i == 0:
-				tytuł += line+'\n'
-				tekst.append(f'<br /><br /><p class="ct"><strong>{line}</strong></p><br />\n\n')
+			if i == 0:#Wykonuje sie tylko raz
+				Tytuł += line+'\n'
+				Tekst.append(f'<br /><br /><p class="ct"><strong>{line}</strong></p><br />\n\n')#Tytuł wiersza
 				po = True
 				continue
-			if not line:
+			if not line:#Gdy jest enter
 				enter += 1
 				continue
-			if grafika and len(line) > 8:
-				if line[4] == 's':
+			if grafika and len(line) > 8:#Grafiki
+				if line[4] == 's':#https
 					index = line[8:].find('/')
-					linki.append(f'<li><a href="https://{line[8:]}">{line[8:index+8]}</a></li>\n')
+					Linki.append(f'<li><a href="https://{line[8:]}">{line[8:index+8]}</a></li>\n')
 					continue
-				elif line[4]== ':':
+				elif line[4]== ':':#http
 					index = line[7:].find('/')
-					linki.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
+					Linki.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
 
-				linki.append('</ul>\n')#Koniec grafik
-				podpis.append(line[10:])#Komentarz bez początku "Komenatrz:"
+				Linki.append('</ul>\n')#Koniec grafik
+				Podpis.append(line[10:])#Komentarz bez początku "Komenatrz:"
 				break
-			if line == 'Grafika:':
+			if line == 'Grafika:':#Grafika start
 				grafika = 1
-				linki.append('</p>\n\n<p>Grafika:</p>\n<ul>\n')
+				Linki.append('</p>\n\n<p>Grafika:</p>\n<ul>\n')
 			else:
-				if grafika:
+				if grafika:#Podpis
 					try:
-						podpis.append(line+'\n')#Podpis
+						Podpis.append(line+'\n')#Podpis
 					except:
-						podpis.append('Czytelnik SGI Lesser\n')
+						Podpis.append('Czytelnik SGI Lesser\n')
 				else:
-					if po:
-						tekst.append(f'<p class="ct">{line}')
+					if po:#Gdy jest po tytule wiersza
+						Tekst.append(f'<p class="ct">{line}')#Akapit wersów
 						enter = 0
-						po = False
+						po = False#Akapit wersów stop
 						continue
-					if enter > 3:
-						tekst.append(f'</p>\n\n<br /><br /><p class="ct"><strong>{line}</strong></p><br />\n\n')
+					if enter > 3:#Gdy są 4 entery to jest odstęp między wierszami(dla bezpieczeńtwa większe od 3)
+						Tekst.append(f'</p>\n\n<br /><br /><p class="ct"><strong>{line}</strong></p><br />\n\n')#Tytuł wiersza
 						enter = 0
-						po = True
+						po = True#Akapit wersów start
 						continue
 
 					else:
-						if enter == 3: tekst.append('<br />\n')
-						tekst.append(f'<br />\n{line}')
-						enter = 0
+						if enter == 3: Tekst.append('<br />\n')#Gdy wyliczono 3 entery to jest odstęp
+						Tekst.append(f'<br />\n{line}')#Wersy
+						enter = 0#Brak enterów
 
 
-		zawartość.append(tytuł)
-		zawartość.append(''.join(tekst))
-		zawartość.append(''.join(linki))
-		zawartość.append(''.join(podpis))
+		zawartość.append(Tytuł)
+		zawartość.append(''.join(Tekst))
+		zawartość.append(''.join(Linki))
+		zawartość.append(''.join(Podpis))
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
 		print('#Plik',filename[:-4]+'txt','poprawnie stworzony')
 
 	except TabError:
-		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')
+		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')#Spotkany błąd z rozszerzeniem ".rtf"
 		print(TabError)
 		return 0
 
 
-def zdjęcie(filenamezdj):
+def zdjęcie(filenamezdj):#Tworzenie obrazu z odpowiednimi wymiarami
 
-	img = Image.open(filenamezdj)
-	width,height = img.size[0],img.size[1]
+	img = Image.open(filenamezdj)#Objekt obrazu
+	szerokość,wysokość = img.size[0],img.size[1]#szerokość, wysokość
 
-	if img.size[0] == 300 or img.size[0] == 280:
+	if img.size[0] == 300 or img.size[0] == 280:#Gdy obraz ma odpowiednie wymiary
 		print('\t#Plik',filenamezdj+' ma odpowiednie wymiary')
 		return 0
 
-	if img.size[0] < img.size[1]:
-		new_width = 280
+	if szerokość < wysokość:#Gdy wysokość jest większa od szerokości
+		nowa_szerokość = 280
 
-	if img.size[0] > img.size[1]:
-		new_width = 300
+	if szerokość > wysokość:#Gdy wysokość jest większa od szerokości
+		nowa_szerokość = 300
 
-	if img.size[0] == img.size[1]:
-		new_width = 300
+	if szerokość == wysokość:#Gdy wysokość i szerokość są równe
+		nowa_szerokość = 300
 
-	new_height = int(new_width * height / width)
+	nowa_wysokość = int(nowa_szerokość * wysokość / szerokość)#Nowa wysokość z proporcji
 
 
-	resized_img = img.resize((new_width, new_height), Image.ANTIALIAS)
+	nowy_img = img.resize((nowa_szerokość, nowa_wysokość), Image.ANTIALIAS)#Nowy obraz
 
 	try:
-		if filenamezdj[-3:] == 'jpg' or filenamezdj[-3:] == 'jpeg':
-			resized_img.save(filenamezdj)
+		if filenamezdj[-3:] == 'jpg' or filenamezdj[-3:] == 'jpeg':#Gdy stary obraz jest rozszerzenia jpg, jpeg
+			nowy_img.save(filenamezdj)
 			print('#Plik',filenamezdj+' poprawnie stworzony')
 			return
 		else:
 			try:
-				resized_img.save(filenamezdj[:-3]+'jpg')
+				nowy_img.save(filenamezdj[:-3]+'jpg')#Próba zapisania jako jpg
 			except:
-				resized_img.save(filenamezdj)
+				nowy_img.save(filenamezdj)#Nadpisanie istniejącego
 				print('#Plik',filenamezdj[:-3]+filenamezdj[-3:]+' poprawnie stworzony')
 				return
 			print('#Plik',filenamezdj[:-3]+'jpg'+' poprawnie stworzony')
@@ -201,30 +201,27 @@ def zdjęcie(filenamezdj):
 
 print(f'######### lesser.py ### {version} #########\n')
 
-jestplik = False
-ile_jest_grafik = 0
-for filename in os.listdir():
+jestplik = False#Czy wykryto pliki
+ile_jest_grafik = 0#Liczba grafik
+for filename in os.listdir():#Przeszukiwanie nazw plików obrazów
 
-	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-4:] == 'jpeg'):
+	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-4:] == 'jpeg'):#Wykryto obraz
 		jestplik = True
 		ile_jest_grafik += 1
 
-		if filename[-5].isdigit(): zdjęcie(filename)
+		if filename[-5].isdigit(): zdjęcie(filename)#Zmiana obrazu gdy nie jest głównym
 
 if ile_jest_grafik == 0:
 	print('#Nie znaleziono grafik')
 
-for filename in os.listdir():
+for filename in os.listdir():#Przeszukiwanie nazw plików w poszukiwaniu docx
 
 	if filename[-4:] == 'docx':
 		if ile_jest_grafik > 1:
 			felieton(filename)
-		if ile_jest_grafik == 1:
+		if ile_jest_grafik == 1:#Poezje mają tylko jedno zdjęcie
 			poezja(filename)
 		jestplik = True
 
 if not jestplik:
 	print('#Nie znaleziono żadnych plików')
-
-
-#	#		#		#		#		Jakub "ybuq" Idec		#		#		#		#	#
