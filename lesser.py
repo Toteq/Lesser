@@ -2,8 +2,8 @@
 
 version = 'v2.0'
 
-import docx2txt#zamienia docx na txt
-from PIL import Image#operacje na zdjęciach
+import docx2txt#https://pypi.org/project/docx2txt/
+from PIL import Image#https://pypi.org/project/Pillow/
 import os
 
 
