@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = 'v2.0'
+version = 'v2.2'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -52,14 +52,42 @@ def felieton(filenamedocx):
 						autor = line#Podpis autora
 
 
-		#Rozmieszczenie grafik w tekscie(test)
+		#Rozmieszczenie grafik w tekscie
+		################################
+
+		#Indexy akapitów
+		indeksy_akapitów = []
+		długość = 0
+		licznik_akapitów = 0
+		która_grafika = 0
+		for x in range(len(tekst)):
+			długość += len(tekst[x])
+			indeksy_akapitów.append(długość)
+
+		#Odległość od siebie jako średnia
 		Tekst = ''#Końcowy tekst
 		index_grafik = []#Lista przechowująca indexy gdzie powinny znajdować sie grafiki
 		tekst = ''.join(tekst)#Złączenie listy treści artykułu na string
-		długość = len(tekst)#Długość treści artykułu
-		co_ile = długość//(ile_jest_grafik)#Co ile liter ma być grafika
+		długość = len(tekst)#Długość artykułu
+		co_ile = długość//(ile_jest_grafik)#Co ile grafika
 
-		[index_grafik.append(co_ile*x) for x in range(1, ile_jest_grafik)]#Tworzenie listy która przechowuje kolejne indeksy gdzie znajdować mają się grafiki
+		[index_grafik.append(co_ile*x) for x in range(1, ile_jest_grafik)]#Tworzenie listy która przechowuje kolejne indeksy grafik
+
+		#Uwzględnienie wysokości grafik
+		for i in range( len(wysokość_obrazów)-1):
+			if wysokość_obrazów[i] > 300:
+				przesunięcie = round((abs(300 - wysokość_obrazów[i]) / 21)*86)
+				if wysokość_obrazów[i] > 400: index_grafik[0] -= przesunięcie
+				index_grafik[i+1] += przesunięcie
+
+		#Uwzględnienie odstępów akapitów
+		for x in range(len(tekst)):
+			if x in indeksy_akapitów:
+				licznik_akapitów += 1
+			if x in index_grafik:
+				index_grafik[która_grafika] -= 86*licznik_akapitów
+				licznik_akapitów = 0
+				która_grafika += 1
 
 		for i,litera in enumerate(tekst):#index, litera
 			if i in index_grafik:#Jeżeli index litery jest taki sam jak index grafiki
@@ -72,7 +100,7 @@ def felieton(filenamedocx):
 		zawartość.append(''.join(Linki))
 		zawartość.append(''.join(Podpis))
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
-		print('#Plik',filename[:-4]+'txt','poprawnie stworzony')
+		print('#Plik',filenamedocx[:-4]+'txt','poprawnie stworzony')
 
 	except TabError:
 		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')
@@ -147,7 +175,7 @@ def poezja(filenamedocx):
 		zawartość.append(''.join(Linki))
 		zawartość.append(''.join(Podpis))
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
-		print('#Plik',filename[:-4]+'txt','poprawnie stworzony')
+		print('#Plik',filenamedocx[:-4]+'txt','poprawnie stworzony')
 
 	except TabError:
 		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')#Spotkany błąd z rozszerzeniem ".rtf"
@@ -155,13 +183,14 @@ def poezja(filenamedocx):
 		return 0
 
 
-def zdjęcie(filenamezdj):#Tworzenie obrazu z odpowiednimi wymiarami
+def zdjęcie(filenameimg):#Tworzenie obrazu z odpowiednimi wymiarami
 
-	img = Image.open(filenamezdj)#Objekt obrazu
+	img = Image.open(filenameimg)#Objekt obrazu
 	szerokość,wysokość = img.size[0],img.size[1]#szerokość, wysokość
 
 	if img.size[0] == 300 or img.size[0] == 280:#Gdy obraz ma odpowiednie wymiary
-		print('\t#Plik',filenamezdj+' ma odpowiednie wymiary')
+		print('\t#Plik',filenameimg+' ma odpowiednie wymiary')
+		wysokość_obrazów[int(filenameimg[-5])-1] = img.size[1]
 		return 0
 
 	if szerokość < wysokość:#Gdy wysokość jest większa od szerokości
@@ -177,24 +206,25 @@ def zdjęcie(filenamezdj):#Tworzenie obrazu z odpowiednimi wymiarami
 
 
 	nowy_img = img.resize((nowa_szerokość, nowa_wysokość), Image.ANTIALIAS)#Nowy obraz
+	wysokość_obrazów[int(filenameimg[-5])-1] = nowa_wysokość#Dodanie wysokości
 
 	try:
-		if filenamezdj[-3:] == 'jpg' or filenamezdj[-3:] == 'jpeg':#Gdy stary obraz jest rozszerzenia jpg, jpeg
-			nowy_img.save(filenamezdj)
-			print('#Plik',filenamezdj+' poprawnie stworzony')
+		if filenameimg[-3:] == 'jpg' or filenameimg[-3:] == 'jpeg':#Gdy stary obraz jest rozszerzenia jpg, jpeg
+			nowy_img.save(filenameimg)
+			print('#Plik',filenameimg+' poprawnie stworzony')
 			return
 		else:
 			try:
-				nowy_img.save(filenamezdj[:-3]+'jpg')#Próba zapisania jako jpg
+				nowy_img.save(filenameimg[:-3]+'jpg')#Próba zapisania jako jpg
 			except:
-				nowy_img.save(filenamezdj)#Nadpisanie istniejącego
-				print('#Plik',filenamezdj[:-3]+filenamezdj[-3:]+' poprawnie stworzony')
+				nowy_img.save(filenameimg)#Nadpisanie istniejącego
+				print('#Plik',filenameimg[:-3]+filenameimg[-3:]+' poprawnie stworzony')
 				return
-			print('#Plik',filenamezdj[:-3]+'jpg'+' poprawnie stworzony')
+			print('#Plik',filenameimg[:-3]+'jpg'+' poprawnie stworzony')
 			return
 
 	except:
-		print('#Błąd pliku',filename)
+		print('#Błąd pliku',filenameimg)
 		return
 
 
@@ -203,7 +233,8 @@ print(f'######### lesser.py ### {version} #########\n')
 
 jestplik = False#Czy wykryto pliki
 ile_jest_grafik = 0#Liczba grafik
-for filename in os.listdir():#Przeszukiwanie nazw plików obrazów
+wysokość_obrazów = {}#Słownik {"numer_obrazu":wysokość}
+for filename in os.listdir():#Przeszukiwanie nazw plików obrazów i docx
 
 	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-4:] == 'jpeg'):#Wykryto obraz
 		jestplik = True
@@ -211,17 +242,20 @@ for filename in os.listdir():#Przeszukiwanie nazw plików obrazów
 
 		if filename[-5].isdigit(): zdjęcie(filename)#Zmiana obrazu gdy nie jest głównym
 
+	if filename[-4:] == 'docx': filenamedocx = filename
+
+if ile_jest_grafik > 1:
+	felieton(filenamedocx)
+	jestplik = True
+if ile_jest_grafik == 1:#Poezje mają tylko jedno zdjęcie
+	poezja(filenamedocx)
+	jestplik = True
+
+
 if ile_jest_grafik == 0:
-	print('#Nie znaleziono grafik')
-
-for filename in os.listdir():#Przeszukiwanie nazw plików w poszukiwaniu docx
-
-	if filename[-4:] == 'docx':
-		if ile_jest_grafik > 1:
-			felieton(filename)
-		if ile_jest_grafik == 1:#Poezje mają tylko jedno zdjęcie
-			poezja(filename)
-		jestplik = True
+	print('#Nie znaleziono odpowiednich plików - grafik')
+	exit()
 
 if not jestplik:
 	print('#Nie znaleziono żadnych plików')
+	exit()
