@@ -56,13 +56,13 @@ def felieton(filenamedocx):
 		################################
 
 		#Indexy akapitów
-		indeksy_akapitów = []
-		długość = 0
-		licznik_akapitów = 0
-		która_grafika = 0
+		indeksy_akapitów = []#Na jakim indeksie zaczynają się akapity
+		długość = 0#Długość tekstu
+		licznik_akapitów = 0#Ile jest akapitów
+		która_grafika = 0#Przed którą grafiką jest określona liczba akapitów
 		for x in range(len(tekst)):
-			długość += len(tekst[x])
-			indeksy_akapitów.append(długość)
+			długość += len(tekst[x])#Długość tekstu w akapicie "x"
+			indeksy_akapitów.append(długość)#Dodanie do listy indeksów
 
 		#Odległość od siebie jako średnia
 		Tekst = ''#Końcowy tekst
@@ -75,9 +75,9 @@ def felieton(filenamedocx):
 
 		#Uwzględnienie wysokości grafik
 		for i in range( len(wysokość_obrazów)-1):
-			if wysokość_obrazów[i] > 300:
+			if wysokość_obrazów[i] > 300:#Przesunięcie obrazu o "przesunięcie" gdy wysokość jest większa od 300px
 				przesunięcie = round((abs(300 - wysokość_obrazów[i]) / 21)*86)
-				if wysokość_obrazów[i] > 400: index_grafik[0] -= przesunięcie
+				if wysokość_obrazów[i] > 400: index_grafik[0] -= przesunięcie#Gdy obraz jest wyższy niż 400px to przesuń też pierwszy obraz
 				index_grafik[i+1] += przesunięcie
 
 		#Uwzględnienie odstępów akapitów
@@ -85,7 +85,7 @@ def felieton(filenamedocx):
 			if x in indeksy_akapitów:
 				licznik_akapitów += 1
 			if x in index_grafik:
-				index_grafik[która_grafika] -= 86*licznik_akapitów
+				index_grafik[która_grafika] -= 86*licznik_akapitów#86 znaków ma najdłuższy wiersz
 				licznik_akapitów = 0
 				która_grafika += 1
 
