@@ -34,11 +34,10 @@ def felieton(filenamedocx):
 					index = line[7:].find('/')
 					Linki.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
 					continue
-				elif len(line)>20:#Kiedy trafimy na Komentarz(samo "Komentarz:" ma 10 znaków - mogą być problemy przy krótszych komentarzach)
-					Linki.append('</ul>\n')#Koniec listy
-					Podpis.append(autor+'\n')#Podpis
-					Podpis.append(line[10:])#Komentarz bez "Komenatrz:"
-					break
+				Linki.append('</ul>\n')#Koniec listy
+				Podpis.append(autor+'\n')#Podpis
+				Podpis.append(line[10:])#Komentarz bez "Komenatrz:"
+				break
 			if line == 'Grafika:':#Start grafika
 				grafika = 1
 				Linki.append('<p>Grafika:</p>\n<ul>\n')
@@ -139,6 +138,7 @@ def poezja(filenamedocx):
 				elif line[4]== ':':#http
 					index = line[7:].find('/')
 					Linki.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
+					continue
 
 				Linki.append('</ul>\n')#Koniec grafik
 				Podpis.append(line[10:])#Komentarz bez początku "Komenatrz:"
@@ -234,7 +234,11 @@ print(f'######### lesser.py ### {version} #########\n')
 jestplik = False#Czy wykryto pliki
 ile_jest_grafik = 0#Liczba grafik
 wysokość_obrazów = {}#Słownik {"numer_obrazu":wysokość}
-for filename in os.listdir():#Przeszukiwanie nazw plików obrazów i docx
+nazwy_plików = []
+
+[nazwy_plików.append(nazwa_pliku) for nazwa_pliku in os.listdir()]#Nazwy plików zawartych w folderze
+
+for filename in nazwy_plików:#Przeszukiwanie nazw plików obrazów i docx
 
 	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-4:] == 'jpeg'):#Wykryto obraz
 		jestplik = True
