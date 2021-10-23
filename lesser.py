@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = 'v2.2'
+version = 'v2.4'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -16,6 +16,7 @@ def felieton(filenamedocx):
 	autor = 'Czytelnik SGI Lesser'#Autor domyślny gdy nie ma podpisu
 	grafika = 0
 	zawartość = []
+	special_format = ['KONIEC', 'CDN.']
 
 	try:
 
@@ -42,13 +43,16 @@ def felieton(filenamedocx):
 				grafika = 1
 				Linki.append('<p>Grafika:</p>\n<ul>\n')
 			else:
+				if grafika:
+					autor = line#Podpis autora
+					continue
 				if len(line) > 20:#Treść artykułu
 					tekst.append(f'<p>{line}</p>\n')
 				else:
-					if len(line) > 8 and len(line) < 20 and not grafika:#Podpis w Tekstach Czytelnika i nie tylko...
-						tekst.append(f'<b>{line}</b>\n')#Akapity
-					else:
-						autor = line#Podpis autora
+					if len(line) > 8 and len(line) < 20 and not grafika:
+						tekst.append(f'<b>{line}</b>\n')#Podpis w Tekstach Czytelnika i podtytuły
+					if line in special_format:#Specialne wyrazy
+						tekst.append(f'<p class="ct">{line}</p>\n')
 
 
 		#Rozmieszczenie grafik w tekscie
