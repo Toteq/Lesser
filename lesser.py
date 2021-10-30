@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = 'v2.4'
+version = '2.5'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -16,7 +16,7 @@ def felieton(filenamedocx):
 	autor = 'Czytelnik SGI Lesser'#Autor domyślny gdy nie ma podpisu
 	grafika = 0
 	zawartość = []
-	special_format = ['KONIEC', 'CDN.']
+	zakończenia = ['KONIEC', 'CDN.']
 
 	try:
 
@@ -39,7 +39,7 @@ def felieton(filenamedocx):
 				Podpis.append(autor+'\n')#Podpis
 				Podpis.append(line[10:])#Komentarz bez "Komenatrz:"
 				break
-			if line == 'Grafika:':#Start grafika
+			if line.strip() == 'Grafika:':#Start grafika
 				grafika = 1
 				Linki.append('<p>Grafika:</p>\n<ul>\n')
 			else:
@@ -51,7 +51,7 @@ def felieton(filenamedocx):
 				else:
 					if len(line) > 8 and len(line) < 20 and not grafika:
 						tekst.append(f'<b>{line}</b>\n')#Podpis w Tekstach Czytelnika i podtytuły
-					if line in special_format:#Specialne wyrazy
+					if line in zakończenia:#Specialne zakończenia
 						tekst.append(f'<p class="ct">{line}</p>\n')
 
 
@@ -92,21 +92,25 @@ def felieton(filenamedocx):
 				licznik_akapitów = 0
 				która_grafika += 1
 
+
+		#Specjalnie znaki
+		#################
+
 		for i,litera in enumerate(tekst):#index, litera
-			if i in index_grafik:#Jeżeli index litery jest taki sam jak index grafiki
-				Tekst += '<<<GRAFIKA>>>'+litera
-			else:
-				Tekst += litera
+			if i in index_grafik: Tekst += '<<<GRAFIKA>>>'+litera #Jeżeli index litery jest taki sam jak index grafiki
+			if chr(i) == 8222: Tekst += i+'<i>' # „
+			if chr(i) == 8221: Tekst += '</i>'+i # ”
+			else: Tekst += litera
 
 		zawartość.append(tytuł)
 		zawartość.append(''.join(Tekst))
 		zawartość.append(''.join(Linki))
 		zawartość.append(''.join(Podpis))
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
-		print('#Plik',filenamedocx[:-4]+'txt','poprawnie stworzony')
+		print('» Plik',filenamedocx[:-4]+'txt','poprawnie stworzony')
 
 	except TabError:
-		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')
+		print('» Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')
 		print(TabError)
 		return 0
 
@@ -147,7 +151,7 @@ def poezja(filenamedocx):
 				Linki.append('</ul>\n')#Koniec grafik
 				Podpis.append(line[10:])#Komentarz bez początku "Komenatrz:"
 				break
-			if line == 'Grafika:':#Grafika start
+			if line.strip() == 'Grafika:':#Grafika start
 				grafika = 1
 				Linki.append('</p>\n\n<p>Grafika:</p>\n<ul>\n')
 			else:
@@ -179,10 +183,10 @@ def poezja(filenamedocx):
 		zawartość.append(''.join(Linki))
 		zawartość.append(''.join(Podpis))
 		open(filenamedocx[:-5]+'.txt','w').write(''.join(zawartość))
-		print('#Plik',filenamedocx[:-4]+'txt','poprawnie stworzony')
+		print('» Plik',filenamedocx[:-4]+'txt','poprawnie stworzony')
 
 	except TabError:
-		print('#Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')#Spotkany błąd z rozszerzeniem ".rtf"
+		print('» Błąd pliku',filenamedocx,'- możliwe złe rozszerzenie')#Spotkany błąd z rozszerzeniem ".rtf"
 		print(TabError)
 		return 0
 
@@ -193,21 +197,18 @@ def zdjęcie(filenameimg):#Tworzenie obrazu z odpowiednimi wymiarami
 	szerokość,wysokość = img.size[0],img.size[1]#szerokość, wysokość
 
 	if img.size[0] == 300 or img.size[0] == 280:#Gdy obraz ma odpowiednie wymiary
-		print('\t#Plik',filenameimg+' ma odpowiednie wymiary')
+		print('\t» Plik',filenameimg+' ma odpowiednie wymiary')
 		wysokość_obrazów[int(filenameimg[-5])-1] = img.size[1]
 		return 0
 
 	if szerokość < wysokość:#Gdy wysokość jest większa od szerokości
 		nowa_szerokość = 280
-
 	if szerokość > wysokość:#Gdy wysokość jest większa od szerokości
 		nowa_szerokość = 300
-
 	if szerokość == wysokość:#Gdy wysokość i szerokość są równe
 		nowa_szerokość = 300
 
 	nowa_wysokość = int(nowa_szerokość * wysokość / szerokość)#Nowa wysokość z proporcji
-
 
 	nowy_img = img.resize((nowa_szerokość, nowa_wysokość), Image.ANTIALIAS)#Nowy obraz
 	wysokość_obrazów[int(filenameimg[-5])-1] = nowa_wysokość#Dodanie wysokości
@@ -215,25 +216,29 @@ def zdjęcie(filenameimg):#Tworzenie obrazu z odpowiednimi wymiarami
 	try:
 		if filenameimg[-3:] == 'jpg' or filenameimg[-3:] == 'jpeg':#Gdy stary obraz jest rozszerzenia jpg, jpeg
 			nowy_img.save(filenameimg)
-			print('#Plik',filenameimg+' poprawnie stworzony')
+			print('» Plik',filenameimg+' poprawnie stworzony')
 			return
 		else:
 			try:
 				nowy_img.save(filenameimg[:-3]+'jpg')#Próba zapisania jako jpg
 			except:
 				nowy_img.save(filenameimg)#Nadpisanie istniejącego
-				print('#Plik',filenameimg[:-3]+filenameimg[-3:]+' poprawnie stworzony')
+				print('» Plik',filenameimg[:-3]+filenameimg[-3:]+' poprawnie stworzony')
 				return
-			print('#Plik',filenameimg[:-3]+'jpg'+' poprawnie stworzony')
+			print('» Plik',filenameimg[:-3]+'jpg'+' poprawnie stworzony')
 			return
 
 	except:
-		print('#Błąd pliku',filenameimg)
+		print('» Błąd pliku',filenameimg)
 		return
 
 
 
-print(f'######### lesser.py ### {version} #########\n')
+print('\n  |                                        ')
+print('  |        _ \    __|    __|    _ \    __| ')
+print('  |        __/  \__ \  \__ \    __/   |    ')
+print(' _____|  \___|  ____/  ____/  \___|  _|    ')
+print(f'                                         -{version}-\n')
 
 jestplik = False#Czy wykryto pliki
 ile_jest_grafik = 0#Liczba grafik
@@ -255,15 +260,15 @@ for filename in nazwy_plików:#Przeszukiwanie nazw plików obrazów i docx
 if ile_jest_grafik > 1:
 	felieton(filenamedocx)
 	jestplik = True
+
 if ile_jest_grafik == 1:#Poezje mają tylko jedno zdjęcie
 	poezja(filenamedocx)
 	jestplik = True
 
-
-if ile_jest_grafik == 0:
-	print('#Nie znaleziono odpowiednich plików - grafik')
+if not jestplik:
+	print('» Nie znaleziono żadnych plików\n')
 	exit()
 
-if not jestplik:
-	print('#Nie znaleziono żadnych plików')
+if ile_jest_grafik == 0:
+	print('» Nie znaleziono odpowiednich plików - grafik\n')
 	exit()
