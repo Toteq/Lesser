@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = '2.5'
+version = '2.6'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -240,7 +240,7 @@ print('  |        __/  \__ \  \__ \    __/   |    ')
 print(' _____|  \___|  ____/  ____/  \___|  _|    ')
 print(f'                                         -{version}-\n')
 
-jestplik = False#Czy wykryto pliki
+jestdocx = False#Czy wykryto plik docx
 ile_jest_grafik = 0#Liczba grafik
 wysokość_obrazów = {}#Słownik {"numer_obrazu":wysokość}
 nazwy_plików = []
@@ -250,25 +250,22 @@ nazwy_plików = []
 for filename in nazwy_plików:#Przeszukiwanie nazw plików obrazów i docx
 
 	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-4:] == 'jpeg'):#Wykryto obraz
-		jestplik = True
 		ile_jest_grafik += 1
 
 		if filename[-5].isdigit(): zdjęcie(filename)#Zmiana obrazu gdy nie jest głównym
 
-	if filename[-4:] == 'docx': filenamedocx = filename
+	if filename[-4:] == 'docx':
+		filenamedocx = filename
+		jestdocx = True
 
-if ile_jest_grafik > 1:
+if ile_jest_grafik > 1 and jestdocx:
 	felieton(filenamedocx)
-	jestplik = True
-
-if ile_jest_grafik == 1:#Poezje mają tylko jedno zdjęcie
+if ile_jest_grafik == 1 and jestdocx:#Poezje mają tylko jedno zdjęcie
 	poezja(filenamedocx)
-	jestplik = True
 
-if not jestplik:
-	print('» Nie znaleziono żadnych plików\n')
-	exit()
-
+if not jestdocx:
+	print('» Nie znaleziono pliku .docx\n')
 if ile_jest_grafik == 0:
-	print('» Nie znaleziono odpowiednich plików - grafik\n')
-	exit()
+	print('» Nie znaleziono grafik\n')
+
+exit()
