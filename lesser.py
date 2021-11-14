@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = '2.6'
+version = '2.7'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -97,7 +97,7 @@ def felieton(filenamedocx):
 		#################
 
 		for i,litera in enumerate(tekst):#index, litera
-			if i in index_grafik: Tekst += '<<<GRAFIKA>>>'+litera #Jeżeli index litery jest taki sam jak index grafiki
+			if i in index_grafik: Tekst += '<<<GRAFIKA>>>' #Jeżeli index litery jest taki sam jak index grafiki
 			if chr(i) == 8222: Tekst += i+'<i>' # „
 			if chr(i) == 8221: Tekst += '</i>'+i # ”
 			else: Tekst += litera
@@ -251,6 +251,11 @@ for filename in nazwy_plików:#Przeszukiwanie nazw plików obrazów i docx
 
 	if (filename[-3:] == 'jpg' or filename[-3:] == 'png' or filename[-4:] == 'jpeg'):#Wykryto obraz
 		ile_jest_grafik += 1
+
+		if filename[-4:] == 'jpeg':
+			newfilename = filename.replace('.jpeg', '.jpg')
+			os.rename(os.path.join(filename), os.path.join(newfilename))#Zmiana rozszerzenia zdjęcia z jpeg na jpg
+			filename = newfilename#Nowa nazwa pliku
 
 		if filename[-5].isdigit(): zdjęcie(filename)#Zmiana obrazu gdy nie jest głównym
 
