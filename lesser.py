@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = '2.7'
+version = '2.8'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -27,23 +27,26 @@ def felieton(filenamedocx):
 			if not line:
 				continue
 			if grafika and len(line) > 8:#Tworzenie linków gdy line nie jest podpisem
-				if line[4] == 's':#https
-					index = line[8:].find('/')
+				if line.find('https://') >= 0:#https
+					index = line[line.find('https://')+8:].find('/')
+					line = line[line.find('https://'):]
 					Linki.append(f'<li><a href="https://{line[8:]}">{line[8:index+8]}</a></li>\n')
 					continue
-				elif line[4]== ':':#http
-					index = line[7:].find('/')
+				elif line.find('http://') >= 0:#http
+					index = line[line.find('http://')+7:].find('/')
+					line = line[line.find('http://'):]
 					Linki.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
 					continue
 				Linki.append('</ul>\n')#Koniec listy
 				Podpis.append(autor+'\n')#Podpis
-				Podpis.append(line[10:])#Komentarz bez "Komenatrz:"
+				if line.find('Komentarz:') != -1:
+					Podpis.append(line[line.find('Komentarz:')+10:])#Komentarz bez "Komenatrz:"
 				break
 			if line.strip() == 'Grafika:':#Start grafika
 				grafika = 1
 				Linki.append('<p>Grafika:</p>\n<ul>\n')
 			else:
-				if grafika:
+				if grafika and len(line) > 3:
 					autor = line#Podpis autora
 					continue
 				if len(line) > 20:#Treść artykułu
