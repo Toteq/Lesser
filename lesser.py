@@ -26,7 +26,7 @@ def felieton(filenamedocx):
 				continue
 			if not line:
 				continue
-			if grafika and len(line) > 8:#Tworzenie linków gdy line nie jest podpisem
+			if grafika and len(line) > 8 and line != 'Czytelnik SGI Lesser':#Tworzenie linków gdy line nie jest podpisem
 				if line.find('https://') >= 0:#https
 					index = line[line.find('https://')+8:].find('/')
 					line = line[line.find('https://'):]
