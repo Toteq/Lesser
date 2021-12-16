@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = '2.8'
+version = '3.0'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -49,13 +49,24 @@ def felieton(filenamedocx):
 				if grafika and len(line) > 3:
 					autor = line#Podpis autora
 					continue
-				if len(line) > 20:#Treść artykułu
+
+				if line in zakończenia:#Specialne zakończenia
+					tekst.append(f'<p class="ct">{line}</p>\n')
+				#Linki w tekście
+				if line.find('https://') == 0:
+					index = line[line.find('https://')+8:].find('/')
+					tekst.append(f'<a href="https://{line[8:]}">{line[8:index+8]}</a>\n')
+					continue
+				if line.find('http://') == 0:
+					index = line[line.find('https://')+7:].find('/')
+					tekst.append(f'<a href="http://{line[7:]}">{line[7:index+7]}</a>\n')
+					continue
+
+				if len(line) > 8 and len(line) < 20 and not grafika:
+					tekst.append(f'<b>{line}</b>\n')#Podpis w Tekstach Czytelnika i podtytuły
+
+				else:#Treść artykułu
 					tekst.append(f'<p>{line}</p>\n')
-				else:
-					if len(line) > 8 and len(line) < 20 and not grafika:
-						tekst.append(f'<b>{line}</b>\n')#Podpis w Tekstach Czytelnika i podtytuły
-					if line in zakończenia:#Specialne zakończenia
-						tekst.append(f'<p class="ct">{line}</p>\n')
 
 
 		#Rozmieszczenie grafik w tekscie
