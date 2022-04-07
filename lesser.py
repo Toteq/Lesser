@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-version = '3.0'
+version = '3.1'
 
 import docx2txt#https://pypi.org/project/docx2txt/
 from PIL import Image#https://pypi.org/project/image/
@@ -152,18 +152,21 @@ def poezja(filenamedocx):
 			if not line:#Gdy jest enter
 				enter += 1
 				continue
-			if grafika and len(line) > 8:#Grafiki
-				if line[4] == 's':#https
-					index = line[8:].find('/')
+			if grafika and len(line) > 8 and line != 'Czytelnik SGI Lesser':#Tworzenie linków gdy line nie jest podpisem
+				if line.find('https://') >= 0:#https
+					index = line[line.find('https://')+8:].find('/')
+					line = line[line.find('https://'):]
 					Linki.append(f'<li><a href="https://{line[8:]}">{line[8:index+8]}</a></li>\n')
 					continue
-				elif line[4]== ':':#http
-					index = line[7:].find('/')
+				elif line.find('http://') >= 0:#http
+					index = line[line.find('http://')+7:].find('/')
+					line = line[line.find('http://'):]
 					Linki.append(f'<li><a href="http://{line[7:]}">{line[7:index+7]}</a></li>\n')
 					continue
-
-				Linki.append('</ul>\n')#Koniec grafik
-				Podpis.append(line[10:])#Komentarz bez początku "Komenatrz:"
+				Linki.append('</ul>\n')#Koniec listy
+				Podpis.append(autor+'\n')#Podpis
+				if line.find('Komentarz:') != -1:
+					Podpis.append(line[line.find('Komentarz:')+10:])#Komentarz bez "Komenatrz:"
 				break
 			if line.strip() == 'Grafika:':#Grafika start
 				grafika = 1
@@ -171,9 +174,9 @@ def poezja(filenamedocx):
 			else:
 				if grafika:#Podpis
 					try:
-						Podpis.append(line+'\n')#Podpis
+						autor = line#Podpis
 					except:
-						Podpis.append('Czytelnik SGI Lesser\n')
+						autor = 'Czytelnik SGI Lesser\n'
 				else:
 					if po:#Gdy jest po tytule wiersza
 						Tekst.append(f'<p class="ct">{line}')#Akapit wersów
